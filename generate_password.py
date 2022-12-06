@@ -6,6 +6,7 @@ import random
 
 from os.path import join
 
+
 min_size = 12
 max_size = 18
 special_characters = ["!", "?", "#", "@"]
