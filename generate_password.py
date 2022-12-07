@@ -43,24 +43,22 @@ def test():
             min_digit_count = number_count
         if max_digit_count < number_count:
             max_digit_count = number_count
-
         if max_length < len(pw):
             max_length = len(pw)
         if min_length > len(pw):
             min_length = len(pw)
 
+    print("Test ran on 1000 instances")
     print(f"Min/max letter count:{min_letter_count}/{max_letter_count}")
     print(f"Min/max digit count:{min_digit_count}/{max_digit_count}")
     print(f"Min/max sp char count:{min_special_characters}/{max_special_characters}")
     print(f"Min/max length:{min_length}/{max_length}")
 
 
-
-
-
 def generate_password():
     password = ""
-    # 18 and not 19 because only the characters beside the first can be of any kind
+    # 18 and not 19 because only the characters beside the first (an uppercase letter) can be of any kind;
+    # so in case min=12 max=18 password_length is in range [11,17]
     password_length = random.randrange(min_size - 1, max_size)
 
     # The first character will always be an uppercase letter
@@ -68,9 +66,10 @@ def generate_password():
     password += first_letter
 
     # letters:
-    # letters can be of length 0, 2 ... password_length-2 (we already have an uppercase letter)
+    # letters can be of length 0, 1, 2 ... password_length-2
+    # (we already have an uppercase letter that is considered a letter)
     # subtracting 2 in order to have at least
-    # one number and one special character. So the range is (1, password_length - 1)
+    # one number and one special character.
     letters_length = random.randrange(0, password_length - 1)
 
     pieces = []
@@ -78,6 +77,7 @@ def generate_password():
         pieces.append(random.choice(string.ascii_letters))
 
     # Numbers: the range 1,n actually means 1...n-1, so it's ok, we have enough room for another letter
+    # This range will leave at least 1 space for a special character
     numbers_length = random.randrange(1, password_length - letters_length)
 
     for i in range(numbers_length):
@@ -86,22 +86,18 @@ def generate_password():
     # Special characters - the remainder
     special_characters_length = password_length - letters_length - numbers_length
 
-    for i in range(password_length - letters_length - numbers_length):
+    for i in range(special_characters_length):
         pieces.append(random.choice(special_characters))
 
-    # shuffle and append the first uppercase letter
+    # shuffle and append to the first uppercase letter
     random.shuffle(pieces)
     password += functools.reduce(lambda x, y: x + y, pieces)
-    print(f"PASSWORD ({len(password)}): ", password)
+    print(f"PASSWORD ({len(password)} characters): ", password)
 
     return password
 
 
-def generate_password_from_file(file_name):
-    file_path = get_file_abs_path(file_name)
-    if file_path is None:
-        print("File not found. Exiting...")
-        return
+def generate_password_from_file(file_path):
     words = []
 
     with open(file_path, 'r') as file:
@@ -112,11 +108,14 @@ def generate_password_from_file(file_name):
     random.shuffle(words)
 
     for word in words:
-        # leave 2 for special characters and the digit
+        # leave 2 for special characters and the digit and append every word you can
+        # it's greedy indeed, but I considered it the best way to utilize the words
         if len(word) + sum(len(piece) for piece in password_pieces) <= max_size - 2:
             password_pieces.append(word)
 
-    # We take this because we want to know the actual size and to extract the first part to be uppercase letter
+    # We take this because we want to know the actual size and to extract the first part to be uppercase letter.
+    # If the dict is empty, just append any word
+    # And I know that first character of the first word is a letter because a word in a dictionary contains only letters
     if len(password_pieces) == 0:
         first_word = random.choice(string.ascii_uppercase)
     else:
@@ -128,7 +127,7 @@ def generate_password_from_file(file_name):
     current_password_length = sum(len(piece) for piece in password_pieces) + len(first_word)
 
     # We have the minimum requirements. But it will always contain only
-    # a special character and a digit so just add some more characters
+    # a special character and a digit so just add some more characters to reach the min length
     remaining_digits = max_size - current_password_length
     if remaining_digits >= 1:
         if current_password_length >= 12:
@@ -200,10 +199,6 @@ def get_file_abs_path(file_name):
 
 def main():
     argument_list = sys.argv[1:]
-    if argument_list[0] == "test":
-        test()
-        return
-
 
     possible_first_argument = ['-use_dict']
     if len(argument_list) != 0 and len(argument_list) != 2:
@@ -213,18 +208,29 @@ def main():
     match len(argument_list):
         case 0:
             generate_password()
+        case 1:
+            if argument_list[0] == "test":
+                test()
+                return
+            else:
+                print("[ERROR] Invalid arguments\n" + usage_message)
         case 2:
             if argument_list[0] not in possible_first_argument:
                 print(f"[ERROR] Argument {argument_list[0]} not found \n" + usage_message)
                 return
 
             if argument_list[0] == '-use_dict':
-                generate_password_from_file(argument_list[1])
+                # Use this for searching the actual path
+                # file_path = get_file_abs_path(argument_list[1])
+
+                file_path = argument_list[1]
+                if file_path is None:
+                    print("File not found. Exiting...")
+                    return
+                generate_password_from_file(file_path)
             else:
                 print(f"[ERROR] Argument {argument_list[0]} not found \n" + usage_message)
                 return
-
-
 
 
 if __name__ == '__main__':
