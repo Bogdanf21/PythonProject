@@ -18,7 +18,7 @@ def test():
     max_special_characters, min_special_characters = 0, 999
     max_digit_count, min_digit_count = 0, 999
 
-    for i in range(1000):
+    for i in range(20000):
         pw = generate_password()
         letter_count = 0
         special_characters_count = 0
@@ -48,7 +48,7 @@ def test():
         if min_length > len(pw):
             min_length = len(pw)
 
-    print("Test ran on 1000 instances")
+    print("Test ran on 20000 instances")
     print(f"Min/max letter count:{min_letter_count}/{max_letter_count}")
     print(f"Min/max digit count:{min_digit_count}/{max_digit_count}")
     print(f"Min/max sp char count:{min_special_characters}/{max_special_characters}")
@@ -201,9 +201,9 @@ def main():
     argument_list = sys.argv[1:]
 
     possible_first_argument = ['-use_dict']
-    if len(argument_list) != 0 and len(argument_list) != 2:
-        print("[ERROR] Invalid arguments\n" + usage_message)
-        return
+    # if len(argument_list) != 0 and len(argument_list) != 2:
+    #     print("[ERROR] Invalid arguments\n" + usage_message)
+    #     return
 
     match len(argument_list):
         case 0:
