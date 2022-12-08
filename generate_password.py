@@ -13,10 +13,10 @@ usage_message = "Usage:\n - generate_password.py \n - generate_password.py -use_
 
 
 def test():
-    max_length, min_length = 0, 999
-    max_letter_count, min_letter_count = 0, 999
-    max_special_characters, min_special_characters = 0, 999
-    max_digit_count, min_digit_count = 0, 999
+    length_array = []
+    letter_count_array = []
+    special_characters_array = []
+    digit_count_array = []
 
     for i in range(20000):
         pw = generate_password()
@@ -31,28 +31,16 @@ def test():
             else:
                 special_characters_count += 1
 
-        if max_letter_count < letter_count:
-            max_letter_count = letter_count
-        if min_letter_count > letter_count:
-            min_letter_count = letter_count
-        if special_characters_count > max_special_characters:
-            max_special_characters = special_characters_count
-        if special_characters_count < min_special_characters:
-            min_special_characters = special_characters_count
-        if min_digit_count > number_count:
-            min_digit_count = number_count
-        if max_digit_count < number_count:
-            max_digit_count = number_count
-        if max_length < len(pw):
-            max_length = len(pw)
-        if min_length > len(pw):
-            min_length = len(pw)
+        letter_count_array.append(letter_count)
+        special_characters_array.append(special_characters_count)
+        digit_count_array.append(number_count)
+        length_array.append(len(pw))
 
     print("Test ran on 20000 instances")
-    print(f"Min/max letter count:{min_letter_count}/{max_letter_count}")
-    print(f"Min/max digit count:{min_digit_count}/{max_digit_count}")
-    print(f"Min/max sp char count:{min_special_characters}/{max_special_characters}")
-    print(f"Min/max length:{min_length}/{max_length}")
+    print(f"Min/max letter count:{min(letter_count_array)}/{max(letter_count_array)}")
+    print(f"Min/max digit count:{min(digit_count_array)}/{max(digit_count_array)}")
+    print(f"Min/max sp char count:{min(special_characters_array)}/{max(special_characters_array)}")
+    print(f"Min/max length:{min(length_array)}/{max(length_array)}")
 
 
 def generate_password():
@@ -170,7 +158,6 @@ def get_file_abs_path(file_name):
     drives = [root + os.sep]
 
     possible_files = []
-    file = None
     for d in drives:
         possible_file = find_file(file_name, d)
         possible_files += possible_file
